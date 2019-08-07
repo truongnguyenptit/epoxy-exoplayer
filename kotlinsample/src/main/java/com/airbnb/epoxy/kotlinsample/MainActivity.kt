@@ -11,10 +11,15 @@ import com.airbnb.epoxy.kotlinsample.models.CarouselItemCustomViewModel_
 import com.airbnb.epoxy.kotlinsample.models.ItemDataClass
 import com.airbnb.epoxy.kotlinsample.models.itemCustomView
 import com.airbnb.epoxy.kotlinsample.models.itemEpoxyHolder
+import com.airbnb.epoxy.kotlinsample.models.postNewsFeed
 import com.airbnb.epoxy.kotlinsample.views.carouselNoSnap
+import com.airbnb.epoxy.toro.PlayerSelector
+import com.airbnb.epoxy.widget.EthanRecyclerView
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var recyclerView: EpoxyRecyclerView
+    private lateinit var recyclerView: EthanRecyclerView
+
+    internal var selector = PlayerSelector.DEFAULT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +63,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                postNewsFeed {
+                    id("postNewsFeed $i")
+                }
+
+//                postNewsFeedModel {
+//
+//                }
+
                 carouselNoSnap {
                     id("carousel $i")
                     models(mutableListOf<CarouselItemCustomViewModel_>().apply {
@@ -76,8 +89,11 @@ class MainActivity : AppCompatActivity() {
                 ItemDataClass("this is a Data Class Item")
                     .id("data class $i")
                     .addTo(this)
+
             }
         }
+
+        recyclerView.setPlayerSelector(selector)
     }
 
     companion object {

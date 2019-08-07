@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/fb_item_middle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/fb_item_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingMultiplier="1.15"
+            android:maxLines="6"
+            android:padding="8dp" />
+
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/fb_video_player"
+            app:resize_mode="fixed_height"
+            app:surface_type="texture_view"
+            app:use_controller="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="300dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/player_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="4dp"
+                android:background="#80000000"
+                android:maxLines="1"
+                android:padding="4dp"
+                android:textAllCaps="true"
+                android:textColor="#FFFF00" />
+        </com.google.android.exoplayer2.ui.PlayerView>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</LinearLayout>

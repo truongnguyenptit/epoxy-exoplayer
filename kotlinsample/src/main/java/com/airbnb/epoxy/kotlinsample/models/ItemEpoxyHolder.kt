@@ -1,5 +1,6 @@
 package com.airbnb.epoxy.kotlinsample.models
 
+import android.view.View
 import android.widget.TextView
 import com.airbnb.epoxy.EpoxyAttribute
 import com.airbnb.epoxy.EpoxyModelClass
@@ -18,6 +19,7 @@ abstract class ItemEpoxyHolder : EpoxyModelWithHolder<Holder>() {
     @EpoxyAttribute lateinit var title: String
 
     override fun bind(holder: Holder) {
+        holder.parent.setTag(holder)
         holder.titleView.setText(title)
         holder.titleView.setOnClickListener { listener() }
     }
@@ -25,4 +27,5 @@ abstract class ItemEpoxyHolder : EpoxyModelWithHolder<Holder>() {
 
 class Holder : KotlinEpoxyHolder() {
     val titleView by bind<TextView>(R.id.title)
+    val parent by bind<View>(R.id.parent)
 }

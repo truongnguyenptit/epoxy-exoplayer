@@ -18,4 +18,5 @@ lib/.idea/*
 .gradle
 *.iml
 build/
+toro-exoplayer/build/
 local.properties

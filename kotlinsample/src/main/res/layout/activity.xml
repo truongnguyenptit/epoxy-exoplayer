@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#80000000"/>
-    <com.airbnb.epoxy.EpoxyRecyclerView
+    <com.airbnb.epoxy.widget.EthanRecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

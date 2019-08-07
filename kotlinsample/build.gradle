@@ -9,7 +9,7 @@ android {
 
   defaultConfig {
     applicationId "com.airbnb.epoxy.kotlinsample"
-    minSdkVersion rootProject.MIN_SDK_VERSION
+    minSdkVersion 21
     targetSdkVersion rootProject.TARGET_SDK_VERSION
     versionCode 1
     versionName "1.0"
@@ -17,6 +17,11 @@ android {
 
   dataBinding {
     enabled = true
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
   }
 }
 
@@ -27,6 +32,11 @@ dependencies {
   implementation project(':epoxy-databinding')
   implementation project(':epoxy-adapter')
   implementation project(':epoxy-annotations')
+  implementation project(':toro-exoplayer')
+
+  implementation ("com.google.android.exoplayer:exoplayer:2.9.3") {
+    exclude group: 'com.android.support'
+  }
 
   kapt project(':epoxy-processor')
   kaptTest project(":epoxy-processor")

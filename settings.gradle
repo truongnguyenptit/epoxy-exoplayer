@@ -1,4 +1,4 @@
-include ':epoxy-adapter'
+include ':epoxy-adapter', ':toro-exoplayer'
 include ':epoxy-sample'
 include ':epoxy-processor'
 include ':epoxy-annotations'

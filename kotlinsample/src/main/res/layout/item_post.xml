@@ -27,8 +27,8 @@
             app:surface_type="texture_view"
             app:use_controller="false"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="300dp"
+            android:layout_height="231dp"
+            android:minHeight="231dp"
             android:visibility="gone">
 
             <TextView
@@ -44,5 +44,10 @@
                 android:textColor="#FFFF00" />
         </com.google.android.exoplayer2.ui.PlayerView>
     </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <com.airbnb.epoxy.kotlinsample.collageview.CollageView
+        android:id="@+id/collage_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </LinearLayout>

@@ -19,6 +19,7 @@ package com.airbnb.epoxy.widget;
 import android.graphics.Point;
 import android.graphics.Rect;
 
+import com.airbnb.epoxy.EpoxyPlayerHolder;
 import com.airbnb.epoxy.EpoxyRecyclerView;
 import com.airbnb.epoxy.toro.ToroPlayer;
 
@@ -77,8 +78,7 @@ final class Common {
     dummyRect.setEmpty();
     dummyPoint.set(0, 0);
     //noinspection ConstantConditions
-    boolean valid = player instanceof EpoxyRecyclerView.ViewHolder;  // Should be true
-    if (valid) valid = ((EpoxyRecyclerView.ViewHolder) player).itemView.getParent() != null;
+    boolean valid = player instanceof EpoxyPlayerHolder;  // Should be true
     if (valid) valid = player.getPlayerView().getGlobalVisibleRect(dummyRect, dummyPoint);
     return valid;
   }

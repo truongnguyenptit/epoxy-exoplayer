@@ -6,7 +6,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.airbnb.epoxy.kotlinsample.DebugLog
 import com.airbnb.epoxy.kotlinsample.R
+import com.airbnb.epoxy.kotlinsample.collageview.CollageView
 import com.airbnb.epoxy.kotlinsample.helpers.KotlinEpoxyHolder
+import com.airbnb.epoxy.kotlinsample.helpers.KotlinEpoxyPlayerHolder
 import com.airbnb.epoxy.media.PlaybackInfo
 import com.airbnb.epoxy.toro.ToroPlayer
 import com.airbnb.epoxy.toro.ToroUtil
@@ -17,7 +19,7 @@ import im.ene.toro.exoplayer.Playable
 import java.lang.String.format
 import java.util.*
 
-class PostNewsFeedViewHolder : KotlinEpoxyHolder(), ToroPlayer {
+class PostNewsFeedViewHolder : KotlinEpoxyPlayerHolder() {
 
     private val listener = object : Playable.DefaultEventListener() {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
@@ -27,15 +29,15 @@ class PostNewsFeedViewHolder : KotlinEpoxyHolder(), ToroPlayer {
     }
 
     init {
-        DebugLog.logD("MEDIA","init")
+        DebugLog.logD("TAG","init")
     }
 
     private var helper: ExoPlayerViewHelper? = null
     private var mediaUri: Uri? = null
-    private var position: Int =  - 1
+    private var position: Int =  1
 
     override fun getPlayerView(): View {
-        DebugLog.logD("MEDIA","getPlayerView")
+        DebugLog.logD("TAG","getPlayerView")
         return this.playerView
     }
 
@@ -44,7 +46,7 @@ class PostNewsFeedViewHolder : KotlinEpoxyHolder(), ToroPlayer {
     }
 
     override fun initialize(container: EthanRecyclerView, playbackInfo: PlaybackInfo) {
-        DebugLog.logD("MEDIA","initialize: ")
+        DebugLog.logD("TAG","initialize: ")
         if (mediaUri == null) throw IllegalStateException("mediaUri is null.")
         if (helper == null) {
             helper = ExoPlayerViewHelper(this, mediaUri!!)
@@ -54,17 +56,18 @@ class PostNewsFeedViewHolder : KotlinEpoxyHolder(), ToroPlayer {
     }
 
     override fun play() {
-        DebugLog.logD("MEDIA","play")
+        DebugLog.logD("TAG","play")
         if (helper != null) helper!!.play()
     }
 
     override fun pause() {
-        DebugLog.logD("MEDIA","pause")
+        DebugLog.logD("TAG","pause")
         if (helper != null) helper!!.pause()
     }
 
     override fun isPlaying(): Boolean {
-        DebugLog.logD("MEDIA","isPlaying")
+        val isPlay = helper != null && helper!!.isPlaying
+        DebugLog.logD("TAG","isPlaying $isPlay")
         return helper != null && helper!!.isPlaying
     }
 
@@ -74,22 +77,23 @@ class PostNewsFeedViewHolder : KotlinEpoxyHolder(), ToroPlayer {
             helper!!.release()
             helper = null
         }
-        DebugLog.logD("MEDIA","release")
+        DebugLog.logD("TAG","release")
     }
 
     override fun wantsToPlay(): Boolean {
-        DebugLog.logD("MEDIA","wantsToPlay")
+        DebugLog.logD("TAG","wantsToPlay")
         return ToroUtil.visibleAreaOffset(this, parent) >= 0.85
     }
 
     override fun getPlayerOrder(): Int {
-        DebugLog.logD("MEDIA","getPlayerOrder")
+        DebugLog.logD("TAG","getPlayerOrder")
         return position
     }
 
     val parent by bind<LinearLayout>(R.id.parent)
     val playerView by bind<PlayerView>(R.id.fb_video_player)
     val state by bind<TextView>(R.id.player_state)
+    val collageView by bind<CollageView>(R.id.collage_view)
 
 
     fun bindUri(position: Int, uri: Uri?) {
@@ -97,7 +101,7 @@ class PostNewsFeedViewHolder : KotlinEpoxyHolder(), ToroPlayer {
         mediaUri = Uri.parse("file:///android_asset/tos.mp4")
         playerView.visibility = View.VISIBLE
 
-        DebugLog.logD("MEDIA","bindUri")
+        DebugLog.logD("TAG","bindUri")
     }
 
 }

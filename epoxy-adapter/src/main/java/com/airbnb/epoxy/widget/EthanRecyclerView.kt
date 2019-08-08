@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.POWER_SERVICE
 import android.graphics.Rect
 import android.os.Build
+import android.os.Debug
 import android.os.Handler
 import android.os.Message
 import android.os.Parcel
@@ -35,9 +36,9 @@ import com.airbnb.epoxy.ActivityRecyclerPool
 import com.airbnb.epoxy.AutoModel
 import com.airbnb.epoxy.EpoxyAdapter
 import com.airbnb.epoxy.EpoxyController
-import com.airbnb.epoxy.EpoxyHolder
 import com.airbnb.epoxy.EpoxyItemSpacingDecorator
 import com.airbnb.epoxy.EpoxyModel
+import com.airbnb.epoxy.EpoxyPlayerHolder
 import com.airbnb.epoxy.EpoxyRecyclerView
 import com.airbnb.epoxy.SimpleEpoxyController
 import com.airbnb.epoxy.TypedEpoxyController
@@ -77,9 +78,8 @@ open class EthanRecyclerView @JvmOverloads constructor(
     private var playerDispatcher = PlayerDispatcher.DEFAULT
     private var recyclerListener: RecyclerListenerImpl? = null  // null = not attached/detached
     private var playerSelector = PlayerSelector.DEFAULT   // null = do nothing
-    private var animatorFinishHandler: Handler? =  null  // null = not attached/detached
+    private var animatorFinishHandler: Handler? = null  // null = not attached/detached
     private var behaviorCallback: BehaviorCallback? = null
-
 
     init {
         playerManager = PlayerManager()
@@ -87,8 +87,8 @@ open class EthanRecyclerView @JvmOverloads constructor(
         requestDisallowInterceptTouchEvent(true)
     }
 
-    fun setRecyclerListener(listener: EthanRecyclerView.RecyclerListener?) {
-        if (recyclerListener == null){
+    private fun setRecyclerListener2(listener: EthanRecyclerView.RecyclerListener?) {
+        if (recyclerListener == null) {
             recyclerListener = RecyclerListenerImpl(this)
         }
         recyclerListener!!.delegate = listener
@@ -101,19 +101,18 @@ open class EthanRecyclerView @JvmOverloads constructor(
         child.addOnLayoutChangeListener(childLayoutChangeListener)
         val holder = child.tag
 
-        if (holder !is ToroPlayer) return
+        if (holder !is EpoxyPlayerHolder) return
 
-        val player = holder as ToroPlayer
-        val playerView = player.playerView
-            ?: throw NullPointerException("Expected non-null playerView, found null for: $player")
+        val playerView = holder.playerView
+            ?: throw NullPointerException("Expected non-null playerView, found null for: $holder")
 
-        playbackInfoCache.onPlayerAttached(player)
-        if (playerManager.manages(player)) {
+        playbackInfoCache.onPlayerAttached(holder)
+        if (playerManager.manages(holder)) {
             // I don't expect this to be called. If this happens, make sure to note the scenario.
-            Log.w(TAG, "!!Already managed: player = [$player]")
+            Log.w(TAG, "!!Already managed: player = [$holder]")
             // Only if container is in idle state and player is not playing.
-            if (scrollState == RecyclerView.SCROLL_STATE_IDLE && !player.isPlaying) {
-                playerManager.play(player, playerDispatcher)
+            if (scrollState == RecyclerView.SCROLL_STATE_IDLE && !holder.isPlaying) {
+                playerManager.play(holder, playerDispatcher)
             }
         } else {
             // LeakCanary report a leak of OnGlobalLayoutListener but I cannot figure out why ...
@@ -122,8 +121,8 @@ open class EthanRecyclerView @JvmOverloads constructor(
                 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                 override fun onGlobalLayout() {
                     child.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    if (Common.allowsToPlay(player)) {
-                        if (playerManager.attachPlayer(player)) {
+                    if (Common.allowsToPlay(holder)) {
+                        if (playerManager.attachPlayer(holder)) {
                             dispatchUpdateOnAnimationFinished(false)
                         }
                     }
@@ -139,36 +138,33 @@ open class EthanRecyclerView @JvmOverloads constructor(
         child.removeOnLayoutChangeListener(childLayoutChangeListener)
         val holder = child.tag
         //noinspection PointlessNullCheck
-        if (holder == null || holder !is ToroPlayer) return
-        val player = holder as ToroPlayer
+        if (holder == null || holder !is EpoxyPlayerHolder) return
 
-        val playerManaged = playerManager.manages(player)
-        if (player.isPlaying) {
+        val playerManaged = playerManager.manages(holder)
+        if (holder.isPlaying) {
             if (!playerManaged) {
                 throw IllegalStateException(
-                    "Player is playing while it is not in managed state: $player"
+                    "Player is playing while it is not in managed state: $holder"
                 )
             }
-            this.savePlaybackInfo(player.playerOrder, player.currentPlaybackInfo)
-            playerManager.pause(player)
+            this.savePlaybackInfo(holder.playerOrder, holder.currentPlaybackInfo)
+            playerManager.pause(holder)
         }
         if (playerManaged) {
-            playerManager.detachPlayer(player)
+            playerManager.detachPlayer(holder)
         }
-        playbackInfoCache.onPlayerDetached(player)
+        playbackInfoCache.onPlayerDetached(holder)
         // RecyclerView#onChildDetachedFromWindow(View) is called after other removal finishes, so
         // sometime it happens after all Animation, but we also need to update playback here.
         // If there is no anymore child view, this call will end early.
         dispatchUpdateOnAnimationFinished(true)
         // finally release the player
         // if player manager could not manager player, release by itself.
-        if (!playerManager.release(player)) player.release()
+        if (!playerManager.release(holder)) holder.release()
     }
 
     override fun onScrollStateChanged(state: Int) {
         super.onScrollStateChanged(state)
-        Log.d("TAG", "onScrollStateChanged")
-
         // Need to handle the dead playback even when the Container is still scrolling/flinging.
         val players = playerManager.players
         // 1. Find players those are managed but not qualified to play anymore.
@@ -191,10 +187,13 @@ open class EthanRecyclerView @JvmOverloads constructor(
             }
         }
 
+        Log.d("TAG", "onScrollStateChanged $state")
+
         // 2. Refresh the good players list.
         val layout = super.getLayoutManager()
         // current number of visible 'Virtual Children', or zero if there is no LayoutManager available.
         val childCount = layout?.childCount ?: 0
+        Log.d("TAG", "childCount $childCount")
         if (childCount <= 0 || state != RecyclerView.SCROLL_STATE_IDLE) {
             playerManager.deferPlaybacks()
             return
@@ -203,18 +202,23 @@ open class EthanRecyclerView @JvmOverloads constructor(
         for (i in 0 until childCount) {
             val child = layout!!.getChildAt(i)
             val holder = child?.tag
-            if (holder is ToroPlayer) {
-                val player = holder as ToroPlayer
+            if (holder is EpoxyPlayerHolder) {
                 // Check candidate's condition
-                if (Common.allowsToPlay(player)) {
-                    if (!playerManager.manages(player)) {
-                        playerManager.attachPlayer(player)
+                if (Common.allowsToPlay(holder)) {
+                    Log.d("TAG", "allowsToPlay")
+                    if (!playerManager.manages(holder)) {
+                        playerManager.attachPlayer(holder)
                     }
                     // Don't check the attach result, because the player may be managed already.
-                    if (!player.isPlaying) {  // not playing or not ready to play.
-                        playerManager.initialize(player, this@EthanRecyclerView)
+                    if (!holder.isPlaying) {  // not playing or not ready to play.
+                        playerManager.initialize(holder, this@EthanRecyclerView)
+                        Log.d("TAG", "initialize")
+                    }else{
+                        Log.d("TAG", "isPlaying")
                     }
                 }
+
+                Log.d("TAG", "EpoxyPlayerHolder")
             }
         }
 
@@ -246,8 +250,6 @@ open class EthanRecyclerView @JvmOverloads constructor(
             }
         }
     }
-
-
 
     /**
      * Filter current managed [ToroPlayer]s using [Filter]. Result is sorted by Player
@@ -358,7 +360,6 @@ open class EthanRecyclerView @JvmOverloads constructor(
         }
     }
 
-
     ////// Adapter Data Observer setup
 
     /**
@@ -370,7 +371,6 @@ open class EthanRecyclerView @JvmOverloads constructor(
     private var playbackInfoCache = PlaybackInfoCache(this)
     private var playerInitializer = Initializer.DEFAULT
     private var cacheManager: CacheManager? = null // null by default
-
 
     fun getPlayerInitializer() = playerInitializer
 
@@ -441,6 +441,7 @@ open class EthanRecyclerView @JvmOverloads constructor(
 
         return cache
     }
+
     /**
      * Set a [CacheManager] to this [Container]. A [CacheManager] will
      * allow this [Container] to save/restore [PlaybackInfo] on various states or life
@@ -631,7 +632,7 @@ open class EthanRecyclerView @JvmOverloads constructor(
         EthanRecyclerView.RecyclerListener {
         var delegate: EthanRecyclerView.RecyclerListener? = null
 
-        override fun onViewRecycled(holder: EpoxyHolder) {
+        override fun onViewRecycled(holder: EpoxyPlayerHolder) {
             if (this.delegate != null) this.delegate!!.onViewRecycled(holder)
             if (holder is ToroPlayer) {
                 val player = holder as ToroPlayer
@@ -697,8 +698,6 @@ open class EthanRecyclerView @JvmOverloads constructor(
                 }
         }
     }
-
-
 
     private inner class ToroDataObserver internal constructor() :
         RecyclerView.AdapterDataObserver() {
@@ -770,7 +769,7 @@ open class EthanRecyclerView @JvmOverloads constructor(
          *
          * @param holder The ViewHolder containing the view that was recycled
          */
-        fun onViewRecycled(holder: EpoxyHolder)
+        fun onViewRecycled(holder: EpoxyPlayerHolder)
     }
 
     /**
@@ -801,7 +800,8 @@ open class EthanRecyclerView @JvmOverloads constructor(
     //   super(context, attrs);
     // }
 
-        (delegate: CoordinatorLayout.Behavior<EthanRecyclerView>) : CoordinatorLayout.Behavior<EthanRecyclerView>(),
+        (delegate: CoordinatorLayout.Behavior<EthanRecyclerView>) :
+        CoordinatorLayout.Behavior<EthanRecyclerView>(),
         Handler.Callback {
 
         internal val delegate: CoordinatorLayout.Behavior<in EthanRecyclerView>
@@ -910,7 +910,10 @@ open class EthanRecyclerView @JvmOverloads constructor(
             return delegate.getScrimOpacity(parent, child)
         }
 
-        override fun blocksInteractionBelow(parent: CoordinatorLayout, child: EthanRecyclerView): Boolean {
+        override fun blocksInteractionBelow(
+            parent: CoordinatorLayout,
+            child: EthanRecyclerView
+        ): Boolean {
             return delegate.blocksInteractionBelow(parent, child)
         }
 
@@ -1026,7 +1029,10 @@ open class EthanRecyclerView @JvmOverloads constructor(
             delegate.onRestoreInstanceState(parent, child, state)
         }
 
-        override fun onSaveInstanceState(parent: CoordinatorLayout, child: EthanRecyclerView): Parcelable? {
+        override fun onSaveInstanceState(
+            parent: CoordinatorLayout,
+            child: EthanRecyclerView
+        ): Parcelable? {
             return delegate.onSaveInstanceState(parent, child)
         }
 
@@ -1095,10 +1101,6 @@ open class EthanRecyclerView @JvmOverloads constructor(
             return left != oldLeft || top != oldTop || right != oldRight || bottom != oldBottom
         }
     }
-
-
-
-
 
     protected val spacingDecorator = EpoxyItemSpacingDecorator()
 
@@ -1643,7 +1645,7 @@ open class EthanRecyclerView @JvmOverloads constructor(
         if (recyclerListener == null) {
             recyclerListener = RecyclerListenerImpl(this)
             recyclerListener!!.delegate = null // mark as it is set by Toro, not user.
-//            super.setRecyclerListener(recyclerListener)  // must be a super call
+            setRecyclerListener2(recyclerListener)  // must be a super call
         }
 
         playbackInfoCache.onAttach()
@@ -1668,7 +1670,6 @@ open class EthanRecyclerView @JvmOverloads constructor(
     public override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-
         val params = layoutParams
         if (params is CoordinatorLayout.LayoutParams) {
             val behavior = params.behavior
@@ -1678,8 +1679,8 @@ open class EthanRecyclerView @JvmOverloads constructor(
         }
 
         if (recyclerListener != null && recyclerListener!!.delegate === NULL) {  // set by Toro, not user.
-            super.setRecyclerListener(null)  // must be a super call
             recyclerListener = null
+            setRecyclerListener2(recyclerListener)  // must be a super call
         }
 
         if (animatorFinishHandler != null) {
@@ -1720,8 +1721,6 @@ open class EthanRecyclerView @JvmOverloads constructor(
             }
         }
         clearPoolIfActivityIsDestroyed()
-
-
     }
 
     private fun removeAdapter() {

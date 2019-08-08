@@ -34,6 +34,8 @@ dependencies {
   implementation project(':epoxy-annotations')
   implementation project(':toro-exoplayer')
 
+  implementation 'com.squareup.picasso:picasso:2.71828'
+
   implementation ("com.google.android.exoplayer:exoplayer:2.9.3") {
     exclude group: 'com.android.support'
   }

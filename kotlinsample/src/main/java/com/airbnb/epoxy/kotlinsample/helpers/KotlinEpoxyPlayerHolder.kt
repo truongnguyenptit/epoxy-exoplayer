@@ -11,15 +11,15 @@ import kotlin.reflect.KProperty
  *
  * See [com.airbnb.epoxy.kotlinsample.models.ItemEpoxyHolder] for a usage example.
  */
-abstract class KotlinEpoxyHolder : EpoxyHolder() {
+abstract class KotlinEpoxyPlayerHolder : EpoxyPlayerHolder() {
     private lateinit var view: View
 
     override fun bindView(itemView: View) {
         view = itemView
     }
 
-    protected fun <V : View> bind(id: Int): ReadOnlyProperty<KotlinEpoxyHolder, V> =
-        Lazy { holder: KotlinEpoxyHolder, prop ->
+    protected fun <V : View> bind(id: Int): ReadOnlyProperty<KotlinEpoxyPlayerHolder, V> =
+        Lazy { holder: KotlinEpoxyPlayerHolder, prop ->
             holder.view.findViewById(id) as V?
                 ?: throw IllegalStateException("View ID $id for '${prop.name}' not found.")
         }
@@ -29,13 +29,13 @@ abstract class KotlinEpoxyHolder : EpoxyHolder() {
      * https://github.com/JakeWharton/kotterknife
      */
     private class Lazy<V>(
-        private val initializer: (KotlinEpoxyHolder, KProperty<*>) -> V
-    ) : ReadOnlyProperty<KotlinEpoxyHolder, V> {
+        private val initializer: (KotlinEpoxyPlayerHolder, KProperty<*>) -> V
+    ) : ReadOnlyProperty<KotlinEpoxyPlayerHolder, V> {
         private object EMPTY
 
         private var value: Any? = EMPTY
 
-        override fun getValue(thisRef: KotlinEpoxyHolder, property: KProperty<*>): V {
+        override fun getValue(thisRef: KotlinEpoxyPlayerHolder, property: KProperty<*>): V {
             if (value == EMPTY) {
                 value = initializer(thisRef, property)
             }

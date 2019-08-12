@@ -1,12 +1,14 @@
 package com.airbnb.epoxy.kotlinsample.models
 
 import android.net.Uri
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.airbnb.epoxy.EpoxyAttribute
 import com.airbnb.epoxy.EpoxyModelClass
 import com.airbnb.epoxy.EpoxyModelWithHolder
 import com.airbnb.epoxy.kotlinsample.R
+import com.airbnb.epoxy.widget.PressablePlayerSelector
 import com.gg.gapo.features.posts.PostNewsFeedViewHolder
 import com.gg.gapo.widget.collageview.CollageData
 import okhttp3.MediaType
@@ -21,14 +23,14 @@ abstract class PostNewsFeedModel : EpoxyModelWithHolder<PostNewsFeedViewHolder>(
         holder.parent.tag = holder
         holder.bindUri(
             0,
-            Uri.parse("https://video-1.gapo.vn/videos/results/8f17abb1-2acc-427b-b4b3-1b56fa4519ea/480p/file.m3u8")
+            Uri.parse("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
         )
 
         val photos = ArrayList<CollageData>()
 
         photos.add(
             CollageData(
-                "https://image-1.gapo.vn/images/cb566725-d98b-4b36-88ad-6f2735986345.jpeg",
+                "https://www.gstatic.com/webp/gallery/1.jpg",
                 "",
                 0,
                 1280,
@@ -38,7 +40,7 @@ abstract class PostNewsFeedModel : EpoxyModelWithHolder<PostNewsFeedViewHolder>(
         )
         photos.add(
             CollageData(
-                "https://image-1.gapo.vn/images/cb566725-d98b-4b36-88ad-6f2735986345.jpeg",
+                "https://www.gstatic.com/webp/gallery/1.jpg",
                 "",
                 1,
                 1280,
@@ -48,7 +50,7 @@ abstract class PostNewsFeedModel : EpoxyModelWithHolder<PostNewsFeedViewHolder>(
         )
         photos.add(
             CollageData(
-                "https://image-1.gapo.vn/images/cb566725-d98b-4b36-88ad-6f2735986345.jpeg",
+                "https://www.gstatic.com/webp/gallery/1.jpg",
                 "",
                 2,
                 1280,
@@ -58,7 +60,7 @@ abstract class PostNewsFeedModel : EpoxyModelWithHolder<PostNewsFeedViewHolder>(
         )
         photos.add(
             CollageData(
-                "https://image-1.gapo.vn/images/cb566725-d98b-4b36-88ad-6f2735986345.jpeg",
+                "https://www.gstatic.com/webp/gallery/1.jpg",
                 "",
                 3,
                 1280,

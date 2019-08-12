@@ -14,6 +14,8 @@ import com.airbnb.epoxy.kotlinsample.models.itemEpoxyHolder
 import com.airbnb.epoxy.kotlinsample.models.postNewsFeed
 import com.airbnb.epoxy.kotlinsample.views.carouselNoSnap
 import com.airbnb.epoxy.toro.CacheManager
+import com.airbnb.epoxy.widget.EthanRecyclerView
+import com.airbnb.epoxy.widget.PressablePlayerSelector
 
 class NewsFeedController : TypedEpoxyController<List<Any>>(), CacheManager {
 
@@ -71,6 +73,7 @@ class NewsFeedController : TypedEpoxyController<List<Any>>(), CacheManager {
 
             postNewsFeed {
                 id("postNewsFeed $i")
+//                selector(selector)
             }
 
 //                postNewsFeedModel {

@@ -16,9 +16,11 @@
 
 package com.airbnb.epoxy.widget;
 
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 
+import com.airbnb.epoxy.EpoxyPlayerHolder;
 import com.airbnb.epoxy.EpoxyRecyclerView;
 import com.airbnb.epoxy.annotations.Beta;
 import com.airbnb.epoxy.toro.PlayerSelector;
@@ -44,7 +46,7 @@ import static java.util.Collections.singletonList;
  *
  * A 'Press to Play' {@link PlayerSelector}.
  *
- * This is a {@link OnLongClickListener} that co-operates with {@link Container} to selectively
+ * This is a {@link OnLongClickListener} that co-operates with {@link EthanRecyclerView} to selectively
  * trigger the playback. The common usecase is to allow user to long click on a {@link ToroPlayer}
  * to trigger its playback. In that case, we should set that {@link ToroPlayer} to highest priority
  * among the candidates, and also to clear its priority when user scroll it out of the playable region.
@@ -87,17 +89,20 @@ public class PressablePlayerSelector implements PlayerSelector, OnLongClickListe
   }
 
   @Override public boolean onLongClick(View v) {
+    Log.d("TAG", "CLICK NOW");
     EthanRecyclerView container = weakContainer.get();
     if (container == null) return false;  // fail fast
 
     toPause.set(NO_POSITION); // long click will always mean to 'press to play'.
 
-    EpoxyRecyclerView.ViewHolder viewHolder = container.findContainingViewHolder(v);
-    boolean handled = viewHolder instanceof ToroPlayer;
-    if (handled) handled = allowsToPlay((ToroPlayer) viewHolder);
+    EpoxyPlayerHolder viewHolder = (EpoxyPlayerHolder)v.getTag();
 
-    int position = handled ? viewHolder.getAdapterPosition() : NO_POSITION;
-    if (handled) handled = position != toPlay.getAndSet(position);
+//    EpoxyRecyclerView.ViewHolder viewHolder = container.findContainingViewHolder(v);
+    boolean handled = viewHolder instanceof EpoxyPlayerHolder;
+    if (handled) handled = allowsToPlay(viewHolder);
+
+//    int position = handled ? viewHolder.getAdapterPosition() : NO_POSITION;
+//    if (handled) handled = position != toPlay.getAndSet(position);
 
     if (handled) container.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
     return handled;

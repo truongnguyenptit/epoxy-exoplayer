@@ -102,6 +102,7 @@ class PlayableImpl implements Playable {
     ensureMediaSource();
     ensurePlayerView();
     checkNotNull(player, "Playable#play(): Player is null!");
+    player.setRepeatMode(Player.REPEAT_MODE_ONE);
     player.setPlayWhenReady(true);
   }
 

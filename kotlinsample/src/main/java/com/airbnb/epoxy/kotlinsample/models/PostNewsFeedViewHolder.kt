@@ -13,7 +13,9 @@ import com.airbnb.epoxy.media.PlaybackInfo
 import com.airbnb.epoxy.toro.ToroPlayer
 import com.airbnb.epoxy.toro.ToroUtil
 import com.airbnb.epoxy.widget.EthanRecyclerView
+import com.airbnb.epoxy.widget.PressablePlayerSelector
 import com.google.android.exoplayer2.ui.PlayerView
+import im.ene.toro.exoplayer.ExoPlayerDispatcher
 import im.ene.toro.exoplayer.ExoPlayerViewHelper
 import im.ene.toro.exoplayer.Playable
 import java.lang.String.format
@@ -98,9 +100,8 @@ class PostNewsFeedViewHolder : KotlinEpoxyPlayerHolder() {
 
     fun bindUri(position: Int, uri: Uri?) {
         this.position = position
-        mediaUri = Uri.parse("file:///android_asset/tos.mp4")
+        mediaUri = uri
         playerView.visibility = View.VISIBLE
-
         DebugLog.logD("TAG","bindUri")
     }
 

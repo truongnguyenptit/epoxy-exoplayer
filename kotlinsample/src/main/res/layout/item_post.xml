@@ -23,9 +23,10 @@
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/fb_video_player"
+            app:player_layout_id="@layout/toro_exo_player_view"
             app:resize_mode="fixed_height"
             app:surface_type="texture_view"
-            app:use_controller="false"
+            app:use_controller="true"
             android:layout_width="match_parent"
             android:layout_height="231dp"
             android:minHeight="231dp"

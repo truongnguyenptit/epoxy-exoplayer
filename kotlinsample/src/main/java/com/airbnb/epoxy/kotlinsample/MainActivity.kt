@@ -16,6 +16,7 @@ import com.airbnb.epoxy.kotlinsample.models.postNewsFeed
 import com.airbnb.epoxy.kotlinsample.views.carouselNoSnap
 import com.airbnb.epoxy.toro.PlayerSelector
 import com.airbnb.epoxy.widget.EthanRecyclerView
+import com.airbnb.epoxy.widget.PressablePlayerSelector
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: EthanRecyclerView
